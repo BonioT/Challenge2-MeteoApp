@@ -3,7 +3,8 @@ import SwiftUI
 struct OtherCitiesView: View {
 
     @State private var searchText = ""
-
+    @State private var selectedCity: City? = nil
+    @State private var showingMapDetails = false
     struct City: Identifiable {
         let id = UUID()
         let name: String
@@ -20,7 +21,30 @@ struct OtherCitiesView: View {
         City(name: "Venice", temperature: 21)
     ]
 
-    @State private var selectedCity: City? = nil
+    //Weather symbol and color logic, same as TodayView
+    func weatherSymbol(for temperature: Int) -> String {
+        if temperature >= 26 {
+            return "sun.max.fill"
+        } else if temperature >= 22 {
+            return "cloud.sun.fill"
+        } else if temperature >= 18 {
+            return "cloud.fill"
+        } else {
+            return "cloud.rain.fill"
+        }
+    }
+
+    func colorForTemperature(_ temperature: Int) -> Color {
+        if temperature >= 26 {
+            return .yellow
+        } else if temperature >= 22 {
+            return .orange
+        } else if temperature >= 18 {
+            return .gray
+        } else {
+            return .blue
+        }
+    }
 
     init() {
         let navBarAppearance = UINavigationBarAppearance()
@@ -49,7 +73,9 @@ struct OtherCitiesView: View {
                             Text(city.name)
                             Spacer()
                             Text("\(city.temperature)°C")
-                            Image(systemName: "cloud.sun.fill")
+                            Image(systemName: weatherSymbol(for: city.temperature))
+                                .foregroundColor(colorForTemperature(city.temperature))
+                                .font(.title2)
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
@@ -65,49 +91,95 @@ struct OtherCitiesView: View {
                                 Color(.sRGB, red: 0.13, green: 0.15, blue: 0.2, opacity: 0.95)
                                     .ignoresSafeArea()
                                 VStack(spacing: 24) {
-                                    
-                                    HStack {
-                                        
-                                        Spacer()
-                                        
-                                        Button(action: {
-                                            self.selectedCity = nil
-                                        }) {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .font(.system(size: 32))
-                                                .foregroundColor(.white)
-                                        }
-                                    }.padding()
                                     Text(city.name)
                                         .font(.largeTitle)
                                         .foregroundColor(.white)
                                         .bold()
-                                    Image(systemName: "cloud.sun.fill")
-                                        .font(.system(size: 64))
-                                        .foregroundColor(.white)
-                                    Text("\(city.temperature)°C")
-                                        .font(.title)
-                                        .foregroundColor(.white)
+                                    HStack(spacing: 12) {
+                                        Text("\(city.temperature)°C")
+                                            .font(.title)
+                                            .foregroundColor(.white)
+                                        Image(systemName: weatherSymbol(for: city.temperature))
+                                            .font(.system(size: 64))
+                                            .foregroundColor(colorForTemperature(city.temperature))
+                                    }
                                     Text("Weather details and more coming soon !")
                                         .foregroundColor(.white)
                                         .padding()
                                         .background(.ultraThinMaterial)
                                         .cornerRadius(12)
+                                    
+                                    Button("Close") {
+                                        self.selectedCity = nil
+                                    }
+                                    .padding()
+                                    .background(.ultraThinMaterial)
+                                    .cornerRadius(12)
+                                    .foregroundColor(.white)
                                 }
                                 .padding()
                             }
                         }
                     }
 
+                    // MAP CARD
                     VStack {
-                        Text("Map view coming soon!")
+                        ZStack {
+                            Image("weathermap")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(maxWidth: .infinity, maxHeight: 120)
+                                .clipped()
+                                .cornerRadius(20)
+                                .overlay(
+                                    Rectangle()
+                                        .fill(Color.black.opacity(0.55))
+                                        .cornerRadius(20)
+                                )
+                            Text("Map view coming soon!")
+                                .foregroundColor(.white)
+                                .bold()
+                        }
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(height: 100)
-                    .padding()
+                    .frame(height: 120)
                     .background(.ultraThinMaterial)
                     .cornerRadius(20)
                     .foregroundColor(.white)
+                    .onTapGesture {
+                        showingMapDetails = true
+                    }
+                    .sheet(isPresented: $showingMapDetails) {
+                        ZStack {
+                            Color(.sRGB, red: 0.13, green: 0.15, blue: 0.2, opacity: 0.95)
+                                .ignoresSafeArea()
+                            VStack(spacing: 24) {
+                                Text("Map Details")
+                                    .font(.largeTitle)
+                                    .foregroundColor(.white)
+                                    .bold()
+                                Image("weathermap")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .cornerRadius(16)
+                                    .frame(maxWidth: 320)
+                                Text("Interactive and live maps will appear here soon!")
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(.ultraThinMaterial)
+                                    .cornerRadius(12)
+                                Button("Close") {
+                                    showingMapDetails = false
+                                }
+                                .padding()
+                                .background(.ultraThinMaterial)
+                                .cornerRadius(12)
+                                .foregroundColor(.white)
+                            }
+                            .padding()
+                        }
+                    }
+                   
 
                 }
                 .navigationTitle(Text("Other Cities"))

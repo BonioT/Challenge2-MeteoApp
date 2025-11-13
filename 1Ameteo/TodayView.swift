@@ -8,6 +8,10 @@ struct TodayView: View {
 
     @State private var showingAirQualityDetails = false
     @State private var showingHumidityDetails = false
+    @State private var showingUVDetails = false
+    @State private var showingPressureDetails = false
+    @State private var showingVisibilityDetails = false
+    @State private var showingFeelsLikeDetails = false
     
     struct DayWeather {
         let city: String
@@ -15,7 +19,6 @@ struct TodayView: View {
         let description: String
     }
     
-
     let weekWeather = [
         DayWeather(city: "Naples", temperature: 20, description: "Sunny"),
         DayWeather(city: "Naples", temperature: 19, description: "Cloudy"),
@@ -26,6 +29,36 @@ struct TodayView: View {
         DayWeather(city: "Naples", temperature: 20, description: "Cloudy"),
     ]
     
+    // Function for weather icons
+    func weatherSymbol(for description: String) -> String {
+        switch description {
+        case "Sunny":
+            return "sun.max.fill"
+        case "Cloudy":
+            return "cloud.fill"
+        case "Partly Cloudy":
+            return "cloud.sun.fill"
+        case "Rainy":
+            return "cloud.rain.fill"
+        default:
+            return "cloud.fill"
+        }
+    }
+    // Colors for weather icons
+    func colorForWeather(description: String) -> Color {
+        switch description {
+        case "Sunny":
+            return .yellow
+        case "Cloudy":
+            return .gray
+        case "Partly Cloudy":
+            return .orange
+        case "Rainy":
+            return .blue
+        default:
+            return .gray
+        }
+    }
     
 
     init() {
@@ -40,7 +73,7 @@ struct TodayView: View {
     }
 
     var body: some View {
-
+        let weather = weekWeather[selectedday]
         NavigationStack {
             ZStack {
                 LinearGradient(
@@ -50,27 +83,36 @@ struct TodayView: View {
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
+               
                 ScrollView {
-                    let weather = weekWeather[selectedday]
-                    VStack {
-                        Text(weather.city)
-                            .font(.largeTitle)
-                            .bold()
+                    VStack(alignment: .leading, spacing: 8) {
+                        
+                        HStack(spacing: 8) {
+                            Image(systemName: weatherSymbol(for: weather.description))
+                                .font(.system(size: 40))
+                                .foregroundColor(colorForWeather(description: weather.description))
+                                .shadow(radius: 5)
+                            Text(weather.city)
+                                .font(.largeTitle)
+                                .bold()
+                                .foregroundColor(.white)
+                        }
                         Text("\(weather.temperature)°C")
                             .font(.title)
-                        Text(weather.description)
-                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.leading, 50)
                     }
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button(action: {
-                                //button action
+                                
                             }) {
                                 Image(systemName: "gear")
                             }
                         }
-                    }.navigationTitle(Text(days[selectedday]))
-                        .foregroundStyle(.white)
+                    }
+                    .navigationTitle(Text(days[selectedday]))
+                    .foregroundStyle(.white)
 
                     Picker("Days", selection: $selectedday) {
                         ForEach(0..<days.count, id: \.self) { index in
@@ -79,22 +121,40 @@ struct TodayView: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(16)
+                    .padding(.bottom, 8)
 
+                    // CARDS
                     VStack(spacing: 16) {
                         // Air Quality Card
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Air Quality")
-                                .font(.headline)
-                            Text("Good")
-                                .font(.title)
+                        ZStack {
+                            Image("airqualitymap")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(height: 110)
+                                .clipped()
+                                .cornerRadius(20)
+                                .overlay(
+                                    Rectangle()
+                                        .fill(Color.black.opacity(0.55))
+                                        .cornerRadius(20)
+                                )
+                            HStack {
+                                Text("Air Quality")
+                                    .font(.largeTitle)
+                                    .bold()
+                                    .padding()
+                                    .foregroundColor(.white)
+                                    .shadow(radius: 3)
+                                Spacer()
+                            }
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.ultraThinMaterial)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 110)
+                        .background(.ultraThinMaterial.opacity(0.4))
                         .cornerRadius(20)
                         .shadow(radius: 4)
                         .padding(.horizontal)
-                        .foregroundColor(.white)
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             showingAirQualityDetails = true
                         }
@@ -120,12 +180,32 @@ struct TodayView: View {
                             }
                         }
 
-                        // Humidity Card
+                        // HUMIDITY CARD
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Humidity level")
-                                .font(.headline)
-                            Text("Good")
-                                .font(.title)
+                            HStack {
+                                Image(systemName: "drop.fill")
+                                Text("Humidity level")
+                                    .font(.title)
+                                    .bold()
+                            }
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                .blue, .green, .yellow, .orange, .red, .purple
+                                            ]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(height: 5)
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 10, height: 16)
+                                    .shadow(radius: 2)
+                                    .offset(x: 200)
+                            }
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -134,6 +214,7 @@ struct TodayView: View {
                         .shadow(radius: 4)
                         .padding(.horizontal)
                         .foregroundColor(.white)
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             showingHumidityDetails = true
                         }
@@ -158,60 +239,259 @@ struct TodayView: View {
                                 .padding()
                             }
                         }
-
-                        // Quadrate cards (no sheets qui, ma puoi aggiungere come sopra)
                         HStack(spacing: 16) {
-                            VStack {
-                                Text("UV Index")
-                                    .font(.headline)
+                            // UV INDEX CARD
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "sun.min.fill")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text("UV INDEX")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .textCase(.uppercase)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
                                 Text("3")
-                                    .font(.title)
-                            }
-                            .frame(width: 180, height: 180)
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(20)
-                            .shadow(radius: 4)
-                            .foregroundColor(.white)
-
-                            VStack {
-                                Text("Pressure")
+                                    .font(.system(size: 34, weight: .bold))
+                                Text("Low")
                                     .font(.headline)
-                                Text("1016 hPa")
-                                    .font(.title)
+                                    .foregroundColor(.white)
+                                // SLIDER
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(LinearGradient(
+                                            gradient: Gradient(colors: [.blue, .green, .yellow, .orange, .red, .purple]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing))
+                                        .frame(height: 7)
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 14, height: 14)
+                                        .shadow(radius: 2)
+                                        .offset(x: 40)
+                                }
+                                .padding(.vertical, 4)
+                                Text("Low for the rest of the day.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
                             }
+                            .padding()
                             .frame(width: 180, height: 180)
                             .background(.ultraThinMaterial)
                             .cornerRadius(20)
                             .shadow(radius: 4)
                             .foregroundColor(.white)
+                            .contentShape(Rectangle())
+                            .onTapGesture { showingUVDetails = true }
+                            .sheet(isPresented: $showingUVDetails) {
+                                ZStack {
+                                    Color(.sRGB, red: 0.13, green: 0.15, blue: 0.2, opacity: 0.95).ignoresSafeArea()
+                                    VStack {
+                                        Text("UV Index Details")
+                                            .font(.largeTitle)
+                                            .foregroundColor(.white)
+                                        Text("Detailed UV Index info here.")
+                                            .foregroundColor(.white)
+                                        Button("Close") {
+                                            showingUVDetails = false
+                                        }
+                                        .padding()
+                                        .background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                        .foregroundColor(.white)
+                                    }
+                                    .padding()
+                                }
+                            }
+                            
+                            // PRESSURE CARD
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "gauge")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text("PRESSURE")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .textCase(.uppercase)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                Text("1016 hPa")
+                                    .font(.system(size: 34, weight: .bold))
+                                Text("Normal")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                // SLIDER
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(Color.blue.opacity(0.3))
+                                        .frame(height: 7)
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(Color.blue)
+                                        .frame(width: 80, height: 7)
+                                }
+                                .padding(.vertical, 4)
+                                Text("Stable atmospheric pressure.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            .padding()
+                            .frame(width: 180, height: 180)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(20)
+                            .shadow(radius: 4)
+                            .foregroundColor(.white)
+                            .contentShape(Rectangle())
+                            .onTapGesture { showingPressureDetails = true }
+                            .sheet(isPresented: $showingPressureDetails) {
+                                ZStack {
+                                    Color(.sRGB, red: 0.13, green: 0.15, blue: 0.2, opacity: 0.95).ignoresSafeArea()
+                                    VStack {
+                                        Text("Pressure Details")
+                                            .font(.largeTitle)
+                                            .foregroundColor(.white)
+                                        Text("Detailed pressure info.")
+                                            .foregroundColor(.white)
+                                        Button("Close") {
+                                            showingPressureDetails = false
+                                        }
+                                        .padding()
+                                        .background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                        .foregroundColor(.white)
+                                    }.padding()
+                                }
+                            }
                         }
                         .padding(.horizontal)
 
                         HStack(spacing: 16) {
-                            VStack {
-                                Text("Visibility")
-                                    .font(.headline)
+                            // VISIBILITY CARD
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "eye")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text("VISIBILITY")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .textCase(.uppercase)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
                                 Text("10 km")
-                                    .font(.title)
-                            }
-                            .frame(width: 180, height: 180)
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(20)
-                            .shadow(radius: 4)
-                            .foregroundColor(.white)
-
-                            VStack {
-                                Text("Feels Like")
+                                    .font(.system(size: 34, weight: .bold))
+                                Text("Clear")
                                     .font(.headline)
-                                Text("18°C")
-                                    .font(.title)
+                                    .foregroundColor(.white)
+                                // SLIDER
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(height: 7)
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(Color.green)
+                                        .frame(width: 120, height: 7)
+                                }
+                                .padding(.vertical, 4)
+                                Text("Perfectly clear view.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
                             }
+                            .padding()
                             .frame(width: 180, height: 180)
                             .background(.ultraThinMaterial)
                             .cornerRadius(20)
                             .shadow(radius: 4)
                             .foregroundColor(.white)
+                            .contentShape(Rectangle())
+                            .onTapGesture { showingVisibilityDetails = true }
+                            .sheet(isPresented: $showingVisibilityDetails) {
+                                ZStack {
+                                    Color(.sRGB, red: 0.13, green: 0.15, blue: 0.2, opacity: 0.95).ignoresSafeArea()
+                                    VStack {
+                                        Text("Visibility Details")
+                                            .font(.largeTitle)
+                                            .foregroundColor(.white)
+                                        Text("Current and max visibility information.")
+                                            .foregroundColor(.white)
+                                        Button("Close") {
+                                            showingVisibilityDetails = false
+                                        }
+                                        .padding()
+                                        .background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                        .foregroundColor(.white)
+                                    }
+                                    .padding()
+                                }
+                            }
+                            
+                            // FEELS LIKE CARD
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "thermometer")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text("FEELS LIKE")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .textCase(.uppercase)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                Text("18°C")
+                                    .font(.system(size: 34, weight: .bold))
+                                Text("Similar to actual")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                // SLIDER
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .fill(LinearGradient(
+                                            gradient: Gradient(colors: [.blue, .yellow, .red]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing))
+                                        .frame(height: 7)
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 14, height: 14)
+                                        .shadow(radius: 2)
+                                        .offset(x: 60)
+                                }
+                                .padding(.vertical, 4)
+                                Text("It feels like the actual temperature.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            .padding()
+                            .frame(width: 180, height: 180)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(20)
+                            .shadow(radius: 4)
+                            .foregroundColor(.white)
+                            .contentShape(Rectangle())
+                            .onTapGesture { showingFeelsLikeDetails = true }
+                            .sheet(isPresented: $showingFeelsLikeDetails) {
+                                ZStack {
+                                    Color(.sRGB, red: 0.13, green: 0.15, blue: 0.2, opacity: 0.95).ignoresSafeArea()
+                                    VStack {
+                                        Text("Feels Like Details")
+                                            .font(.largeTitle)
+                                            .foregroundColor(.white)
+                                        Text("More feels like temperature info.")
+                                            .foregroundColor(.white)
+                                        Button("Close") {
+                                            showingFeelsLikeDetails = false
+                                        }
+                                        .padding()
+                                        .background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                        .foregroundColor(.white)
+                                    }.padding()
+                                }
+                            }
                         }
+                        .padding(.horizontal)
                     }
                 }
             }
