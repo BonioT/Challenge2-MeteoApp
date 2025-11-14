@@ -20,7 +20,7 @@ struct TodayView: View {
     }
     
     let weekWeather = [
-        DayWeather(city: "Naples", temperature: 20, description: "Sunny"),
+        DayWeather(city: "Napoli", temperature: 20, description: "Sunny"),
         DayWeather(city: "Naples", temperature: 19, description: "Cloudy"),
         DayWeather(city: "Naples", temperature: 22, description: "Sunny"),
         DayWeather(city: "Naples", temperature: 24, description: "Partly Cloudy"),
