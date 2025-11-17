@@ -1,6 +1,6 @@
 //
-//  _AmeteoApp.swift
-//  1Ameteo
+//  _ReWeather.swift
+//  ReWeather
 //
 //  Created by Antonio Bonetti on 07/11/25.
 //
