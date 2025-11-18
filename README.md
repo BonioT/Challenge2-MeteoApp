@@ -1,4 +1,4 @@
-ReWeather – SwiftUI Weather App
+**ReWeather – SwiftUI Weather App**
 
 ReWeather is a small sample iOS app built with SwiftUI.
 It focuses on showing daily weather in a clean way and experimenting with a modern SwiftUI UI.
